@@ -4,11 +4,12 @@ public class MyWoodman implements Woodman {
 	private String name;
 	private Point location;
 	private Point startLocation;
-	private int lifes = 3;
+	private int lifes;
 	
 	MyWoodman (String m_name, Point start) {
 		name = m_name;
 		startLocation = location = start;
+		lifes = 3;
 	}
 	/**
 	 * Количество жизней персонажа.

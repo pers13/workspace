@@ -45,6 +45,7 @@ public class MyWoodLoader implements WoodLoader {
 		finally {
 			try {
 				reader.close();
+				readerStream.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

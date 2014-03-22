@@ -1,21 +1,26 @@
 package defpac;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MyWood implements Wood {
-	private char[][] m_wood;
-	private Map<String, MyWoodman>m_woodmanList;
+	protected char[][] m_wood;
+	protected Map<String, MyWoodman>m_woodmanList;
 	
 	MyWood (char[][] wood){
 		m_wood = wood;
 		m_woodmanList = new HashMap<String, MyWoodman>();
 	}
 	
-	public void createWoodman(String name, Point start) {
+	public void createWoodman(String name, Point start) throws IOException {
+		if (m_woodmanList.containsKey(name)) {
+			throw new IOException("������ � ����� ������ ��� ����������");
+		}
 		m_woodmanList.put(name, new MyWoodman(name,start));
 	}
-	public Action move (String name, Direction direction) {
+	
+	public Action move (String name, Direction direction) throws IOException {
 		if (!m_woodmanList.containsKey(name)) {
 			return Action.WoodmanNotFound;
 		}		
@@ -23,7 +28,7 @@ public class MyWood implements Wood {
 		if ((newLocation.getX() >= m_wood[0].length)||(newLocation.getX() < 0)||
 		   (newLocation.getY() >= m_wood.length)||(newLocation.getY() < 0))
 		{
-			return Action.Fail;
+			throw new IOException("����� �� ������� ����");
 		}
 		switch (direction) {
 			case Up: 
@@ -43,29 +48,51 @@ public class MyWood implements Wood {
 				break;
 			
 			case None: 
-				return Action.Ok;
+				newLocation = (m_woodmanList.get(name)).GetLocation();
 		}
+		Action current;
+		MyWoodman currentW = m_woodmanList.get(name);
 		char movedPoint = m_wood[newLocation.getY()][newLocation.getX()];
 		switch(movedPoint) {
+			
 			case '1':
-				return Action.Fail;
+				current = Action.Fail;
+				break;
 			case '0':
-				(m_woodmanList.get(name)).SetLocation(newLocation);
-				return Action.Ok;
+				currentW.SetLocation(newLocation);
+				current = Action.Ok;
+				break;
 			case 'K':
-				if ((m_woodmanList.get(name)).Kill()) {
-					(m_woodmanList.get(name)).SetLocation(newLocation);
-					return Action.Dead;
+				if (currentW.Kill()) {
+					currentW.SetLocation(newLocation);
+					current = Action.Dead;
 				}
 				m_woodmanList.remove(name);
-				return Action.WoodmanNotFound;
+				current = Action.WoodmanNotFound;
+				break;
 			case 'L':
-				(m_woodmanList.get(name)).AddLife();
-				(m_woodmanList.get(name)).SetLocation(newLocation);
-				return Action.Life;
+				currentW.AddLife();
+				currentW.SetLocation(newLocation);
+				current = Action.Life;
+				break;
 			default:
-				return null;	
+				return null;
 		}
+		if ((current == Action.Fail) || (direction == Direction.None)) {
+			if (m_wood[currentW.GetLocation().getY()][currentW.GetLocation().getX()] == 'K') {
+				if (!currentW.Kill()) {
+					m_woodmanList.remove(name);
+					current = Action.WoodmanNotFound;
+				} else {
+					current = Action.Dead;
+				}
+			}
+			if (m_wood[currentW.GetLocation().getY()][currentW.GetLocation().getX()] == 'L') {
+				currentW.AddLife();
+				current = Action.Life;
+			}
+		}
+		return current;
 	}
 	public boolean equals(Object wood) {
 		if (wood == null) return false;
@@ -82,5 +109,5 @@ public class MyWood implements Wood {
 			}
 		}
 		return eq;
-		}
+	}
 }

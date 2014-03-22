@@ -19,7 +19,6 @@ public class MyWoodmanTest extends TestCase {
 		assertEquals(woodman.GetLifeCount(), 2, 0.001);
 		woodman.Kill();
 		woodman.Kill();
-		woodman.Kill();
 		assertEquals(woodman.Kill(), false);
 	}
 
